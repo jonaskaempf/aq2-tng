@@ -85,9 +85,10 @@
 
 
 // AQ2:TNG Deathwatch - Updated the Version variables to show TNG Stuff
-#define ACTION_VERSION  "TNG " VERSION
+#define A_VERSION		"0.9jonas"
+#define ACTION_VERSION  "TNG " A_VERSION
 #define TNG_VERSION		"AQ2: The Next Generation"
-#define TNG_VERSION2	"AQ2: The Next Generation " VERSION
+#define TNG_VERSION2	"AQ2: The Next Generation " A_VERSION
 // AQ2:TNG Deathwatch End
 //AQ2:TNG Slicer This is the max players writen on last killed target
 //SLIC2
@@ -108,9 +109,9 @@ void unicastSound(edict_t *ent, int soundIndex, float volume);
 int KickDoor (trace_t * tr_old, edict_t * ent, vec3_t forward);
 
 // Prototypes of base Q2 functions that weren't included in any Q2 header
-qboolean loc_CanSee (edict_t *, edict_t *);
-qboolean IsNeutral (edict_t *);
-qboolean IsFemale (edict_t *);
+bool loc_CanSee (edict_t *, edict_t *);
+bool IsNeutral (edict_t *);
+bool IsFemale (edict_t *);
 void ParseSayText (edict_t *, char *, size_t size);
 
 //PG BUND - BEGIN
@@ -123,7 +124,7 @@ void GetNearbyTeammates (edict_t * self, char *buf);
 //PG BUND - END
 //AQ2:TNG SLICER  New Last killed enemy support
 void ResetKills (edict_t * ent);
-void ResetScores (qboolean playerScores);
+void ResetScores (bool playerScores);
 int ReadKilledPlayers (edict_t * ent);
 void AddKilledPlayer (edict_t * self, edict_t * ent);
 void GetLastKilledTarget (edict_t * self, char *buf);

@@ -1010,6 +1010,8 @@ void JoinTeam (edict_t * ent, int desired_team, int skip_menuclose)
 		ent->client->pers.netname, a, TeamName (desired_team));
 		IRC_printf (IRC_T_GAME, "%n %s %n.",
 		ent->client->pers.netname, a, TeamName (desired_team));
+		
+		STATS_OUT(STATS_JOIN,ent->client->pers.netname,TeamName (desired_team));
 	}
 
 	ent->client->resp.joined_team = (int)(realLtime*10.0f);
@@ -1902,6 +1904,8 @@ int WonGame (int winner)
 		if(use_warnings->value)
 			gi.sound (&g_edicts[0], CHAN_VOICE | CHAN_NO_PHS_ADD,	gi.soundindex ("tng/no_team_wins.wav"), 1.0, ATTN_NONE, 0.0);
 		PrintScores ();
+
+		STATS_OUT(STATS_TIE, TeamName(winner));
 	}
 	else
 	{
@@ -1932,6 +1936,8 @@ int WonGame (int winner)
 			// end of changing sound dir
 			teams[winner].score++;
 			gi.cvar_forceset(teams[winner].teamscore->name, va("%i", teams[winner].score));
+
+			STATS_OUT(STATS_TEAMWIN, TeamName(winner));
 
 			PrintScores ();
 		}

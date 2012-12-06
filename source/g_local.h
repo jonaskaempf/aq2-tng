@@ -790,7 +790,23 @@ extern int snd_fry;
 #define MOD_PUNCH                       50
 #define MOD_GRAPPLE			51
 #define MOD_FRIENDLY_FIRE               0x8000000
-
+// Stats variables
+#define STATS_ID			"STATS" // Tag for identifying stat lines
+#define STATS_OUT(t, ...)	if(stats_log->value ) { STATS_OUT_UNCOND(t, __VA_ARGS__); }
+#define STATS_OUT_UNCOND(t, ...)	gi.dprintf(STATS_ID ",%s," t, level.mapname, __VA_ARGS__)
+#define STATS_STARTMATCH	"startmatch,%s\n"
+#define STATS_ENDMATCH		"endmatch,%s\n"
+#define STATS_TEAMWIN		"teamwin,%s\n"
+#define STATS_TIE			"tie\n"
+#define STATS_JOIN			"teamjoin,%s,%s\n"
+#define STATS_TEAMS			"teams,%s,%s,%s\n"
+#define STATS_NAMECHANGE	"namechange,%s,%s\n"
+#define STATS_KILL			"kill,%s,%s,%s\n"
+#define STATS_SUICIDE		"suicide,%s\n"
+#define STATS_LEVELSTATS	"levelstats,%s,%d,%u,%u,%u,%u,%u,%u\n"
+#define STATS_ROUNDSTATS	"roundstats,%s,%u,%u,%u,%u,%u,%u,%u\n"
+#define STATS_WLEVELSTATS	"wlevelstats,%s,%s,%u,%u,%u\n"
+#define STATS_WROUNDSTATS	"wroundstats,%s,%s,%u,%u,%u\n"
 
 extern int meansOfDeath;
 // zucc for hitlocation of death
@@ -943,6 +959,7 @@ extern cvar_t *allitem;
 
 extern cvar_t *stats_endmap; // If on (1), show the accuracy/etc stats at the end of a map
 extern cvar_t *stats_afterround; // TNG Stats, collect stats between rounds
+extern cvar_t *stats_log; // Stats, print special stats messages to console
 
 extern cvar_t *auto_join;	// Automaticly join clients to teams they were on in last map.
 extern cvar_t *auto_equip;	// Remember weapons and items for players between maps.

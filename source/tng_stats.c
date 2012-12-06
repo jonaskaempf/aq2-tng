@@ -343,39 +343,40 @@ void A_ScoreboardEndLevel (edict_t * ent, edict_t * killer)
     }
 
 
-  total = score = 0;
+	total = score = 0;
 
-  for (i = 0; i < game.maxclients; i++)
-    {
-      cl_ent = g_edicts + 1 + i;
-      if (!cl_ent->inuse)
-	continue;
+	for (i = 0; i < game.maxclients; i++)
+	{
+		cl_ent = g_edicts + 1 + i;
+		if (!cl_ent->inuse)
+			continue;
 
-      score = game.clients[i].resp.score;
-      if (noscore->value)
-	{
-	  j = total;
+		score = game.clients[i].resp.score;
+		if (noscore->value)
+		{
+			j = total;
+		}
+		else
+		{
+			for (j = 0; j < total; j++)
+			{
+				if (score > sortedscores[j])
+					break;
+			}
+			for (k = total; k > j; k--)
+			{
+				sorted[k] = sorted[k - 1];
+				sortedscores[k] = sortedscores[k - 1];
+			}
+		}
+		sorted[j] = i;
+		sortedscores[j] = score;
+		total++;
 	}
-      else
-	{
-	  for (j = 0; j < total; j++)
-	    {
-	      if (score > sortedscores[j])
-		break;
-	    }
-	  for (k = total; k > j; k--)
-	    {
-	      sorted[k] = sorted[k - 1];
-	      sortedscores[k] = sortedscores[k - 1];
-	    }
-	}
-      sorted[j] = i;
-      sortedscores[j] = score;
-      total++;
-    }
-  sprintf (string + strlen (string),
-	   "xv 0 yv 40 string2 \"Frags Player          Shots   Acc   FPM \" "
-	   "xv 0 yv 48 string2 \"Ÿ Ÿ Ÿ Ÿ Ÿ\" ");
+
+	sprintf (string + strlen (string),
+		"xv 0 yv 40 string2 \"Frags Player          Shots   Acc   FPM \" "
+		"xv 0 yv 48 string2 \"Ÿ Ÿ Ÿ Ÿ Ÿ\" ");
 
 //        strcpy (string, "xv 0 yv 32 string2 \"Frags Player          Time Ping Damage Kills\" "
 //                "xv 0 yv 40 string2 \"Ÿ Ÿ Ÿ Ÿ Ÿ Ÿ\" ");
@@ -392,44 +393,48 @@ void A_ScoreboardEndLevel (edict_t * ent, edict_t * killer)
    */
   // AQ2:TNG END
 
-  for (i = 0; i < total; i++)
+	for (i = 0; i < total; i++)
     {
-      ping = game.clients[sorted[i]].ping;
-      if (ping > 999)
-	ping = 999;
-      shots = game.clients[sorted[i]].resp.stats_shots_t;
-      if (shots > 9999)
-	shots = 9999;
-      if (shots != 0)
-	accuracy =
-	  (((double)
-	    game.clients[sorted[i]].resp.stats_shots_h / (double) shots) *
-	   100.0);
-      else
-	accuracy = 0;
+		// Collect stats
+		ping = game.clients[sorted[i]].ping;
+		if (ping > 999)
+			ping = 999;
+		shots = game.clients[sorted[i]].resp.stats_shots_t;
+		if (shots > 9999)
+			shots = 9999;
+		if (shots != 0)
+			accuracy = (((double) game.clients[sorted[i]].resp.stats_shots_h / (double) shots) * 100.0);
+		else
+			accuracy = 0;
 
-      if ((int) ((level.framenum - game.clients[sorted[i]].resp.enterframe) / 10))
-      	fpm = (((double) sortedscores[i] / (double) ((level.framenum - game.clients[sorted[i]].resp.enterframe) / 10)) * 100.0);
-      else
-        fpm = 0.0;
+		if ((int) ((level.framenum - game.clients[sorted[i]].resp.enterframe) / 10))
+      		fpm = (((double) sortedscores[i] / (double) ((level.framenum - game.clients[sorted[i]].resp.enterframe) / 10)) * 100.0);
+		else
+			fpm = 0.0;
+		
+		if (game.clients[sorted[i]].resp.damage_dealt < 1000000)
+			sprintf (damage, "%d", game.clients[sorted[i]].resp.damage_dealt);
+		else
+			strcpy (damage, "******");
 
-      if (game.clients[sorted[i]].resp.damage_dealt < 1000000)
-	sprintf (damage, "%d", game.clients[sorted[i]].resp.damage_dealt);
-      else
-	strcpy (damage, "******");
-      sprintf (string + strlen (string),
-	       "xv 0 yv %d string \"%5d %-15s  %4d %5.1f  %4.1f\" ",
-	       56 + i * 8,
-	       sortedscores[i],
-	       game.clients[sorted[i]].pers.netname, shots, accuracy, fpm);
+		// Print stats
+		sprintf (string + strlen (string),
+			"xv 0 yv %d string \"%5d %-15s  %4d %5.1f  %4.1f\" ",
+			56 + i * 8,
+			sortedscores[i],
+			game.clients[sorted[i]].pers.netname,
+			shots,
+			accuracy,
+			fpm);
+		
 
-      if (strlen (string) > (maxsize - 100) && i < (total - 2))
-	{
-	  sprintf (string + strlen (string),
-		   "xv 0 yv %d string \"..and %d more\" ",
-		   56 + (i + 1) * 8, (total - i - 1));
-	  break;
-	}
+		
+		if (strlen (string) > (maxsize - 100) && i < (total - 2))
+		{
+			sprintf (string + strlen (string), "xv 0 yv %d string \"..and %d more\" ",
+				56 + (i + 1) * 8, (total - i - 1));
+		break;
+		}
     }
 
 
@@ -471,4 +476,111 @@ void Cmd_Statmode_f(edict_t* ent, char *arg)
 		ent->client->resp.stat_mode = i;
 	}
 	stuffcmd(ent, stuff);
+}
+
+// Outputs stats from level
+void Stats_LogLevelStats()
+{
+	if(stats_log->value)
+	{
+	int i, j, k;
+
+	int score, shots;
+	int gametime;
+
+	score = 0;
+	for (i = 0; i < game.maxclients; i++)
+	{
+		edict_t *ent;
+		ent = &g_edicts[i + 1];
+		if (ent->inuse)
+		{
+			int wep;
+			int	wep_no;
+			char wep_name[100];
+			bool print_weapon;
+			client_respawn_t *client;
+
+			client = &game.clients[i].resp;
+			if ((int) ((level.framenum - client->enterframe) / 10))
+      			gametime = (level.framenum - client->enterframe) / 10;
+			else
+				gametime = 0;
+
+			wep_no = 0;
+			for(wep = 0; wep < 100; wep++)
+			{
+				if(print_weapon = Stats_GetWeaponName(wep, wep_name))
+					wep_no = wep;
+
+				if(client->stats_shots[wep_no] && print_weapon) {
+					STATS_OUT_UNCOND(STATS_WLEVELSTATS,
+						game.clients[i].pers.netname,
+						wep_name,
+						client->stats_shots[wep_no],
+						client->stats_hits[wep_no],
+						client->stats_headshot[wep_no]);
+				}
+			}
+
+			STATS_OUT_UNCOND(STATS_LEVELSTATS,
+				game.clients[i].pers.netname,		// name
+				client->score,			// score
+				client->kills,			// kills
+				client->deaths,			// deaths
+				client->stats_shots_t,	// shots
+				client->stats_shots_h,	// hits
+				client->damage_dealt,	// damage
+				gametime);				// time in game (seconds)
+				
+		}
+	} // end for
+	} // end if, i.e. do nothing if !stats_log->value
+}
+
+bool Stats_GetWeaponName(int wep, char *wep_name)
+{
+	bool ret;
+	ret = true;
+	switch (wep)
+	{
+	case MOD_MK23:
+		strcpy(wep_name, MK23_NAME);
+		break;
+	case MOD_MP5:
+		strcpy(wep_name, MP5_NAME);
+		break;
+	case MOD_M4:
+		strcpy(wep_name, M4_NAME);
+		break;
+	case MOD_M3:
+		strcpy(wep_name, M3_NAME);
+		break;
+	case MOD_HC:
+		strcpy(wep_name, HC_NAME);
+		break;
+	case MOD_SNIPER:
+		strcpy(wep_name, SNIPER_NAME);
+		break;
+	case MOD_DUAL:
+		strcpy(wep_name, DUAL_NAME);
+		break;
+	case MOD_KNIFE:
+		strcpy(wep_name, KNIFE_NAME);
+		break;
+	case MOD_KNIFE_THROWN:
+		strcpy(wep_name, KNIFE_NAME);
+		break;
+	case MOD_KICK:
+		strcpy(wep_name, "Kick");
+		break;
+	case MOD_PUNCH:
+		strcpy(wep_name, "Punch");
+		break;
+	default:
+		ret = false;
+		strcpy(wep_name, "Unknown");
+		break;
+	}
+	return ret;
 }

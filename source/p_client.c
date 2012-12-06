@@ -754,6 +754,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 	qboolean ff;
 	int special = 0;
 	int n;
+	char *murderWeapon;
 
 	self->client->resp.ctf_capstreak = 0;
 
@@ -872,7 +873,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 		}
 	}
 
-	if (message && !special)
+	if (message && !special) // This is some form of suicide/accident
 	{
 		sprintf(death_msg, "%s %s\n", self->client->pers.netname, message);
 		PrintDeathMessage(death_msg, self);
@@ -884,6 +885,8 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 				Subtract_Frag(self);
 			}
 		}
+
+		STATS_OUT(STATS_SUICIDE, self->client->pers.netname);
 
 		self->enemy = NULL;
 		return;
@@ -899,6 +902,10 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 			IRC_printf(IRC_T_KILL, death_msg);
 			AddKilledPlayer(self->client->attacker, self);
 			self->client->attacker->client->pers.num_kills++;
+
+			STATS_OUT(STATS_KILL,
+				self->client->attacker->client->pers.netname,self->client->pers.netname,
+				"Pushed of cliff");
 
 			//MODIFIED FOR FF -FB
 			if (!((int)dmflags->value & DF_NO_FRIENDLY_FIRE)
@@ -939,6 +946,8 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 				Subtract_Frag(self);	//self->client->resp.score--;
 			self->enemy = NULL;
 			self->client->resp.deaths++;
+
+			STATS_OUT(STATS_SUICIDE,self->client->pers.netname);
 		}
 		return;
 	}
@@ -958,6 +967,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 
 		switch (mod) {
 		case MOD_MK23:	// zucc
+			murderWeapon = MK23_NAME;
 			switch (loc) {
 			case LOC_HDAM:
 				if (IsNeutral(self))
@@ -991,6 +1001,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 			}
 			break;
 		case MOD_MP5:
+			murderWeapon = MP5_NAME;
 			switch (loc) {
 			case LOC_HDAM:
 				message = "'s brains are on the wall thanks to";
@@ -1019,6 +1030,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 			}
 			break;
 		case MOD_M4:
+			murderWeapon = M4_NAME;
 			switch (loc) {
 			case LOC_HDAM:
 				message = " had a makeover by";
@@ -1042,6 +1054,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 			}
 			break;
 		case MOD_M3:
+			murderWeapon = M3_NAME;
 			n = rand() % 2 + 1;
 			if (n == 1) {
 				message = " accepts";
@@ -1052,6 +1065,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 			}
 			break;
 		case MOD_HC:
+			murderWeapon = HC_NAME;
 			n = rand() % 2 + 1;
 			if (n == 1) {
 				if (attacker->client->resp.hc_mode)	// AQ2:TNG Deathwatch - Single Barreled HC Death Messages
@@ -1074,6 +1088,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 			}
 			break;
 		case MOD_SNIPER:
+			murderWeapon = SNIPER_NAME;
 			switch (loc) {
 			case LOC_HDAM:
 				if (self->client->ps.fov < 90) {
@@ -1101,6 +1116,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 			}
 			break;
 		case MOD_DUAL:
+			murderWeapon = DUAL_NAME;
 			switch (loc) {
 			case LOC_HDAM:
 				message = " was trepanned by";
@@ -1124,6 +1140,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 			}
 			break;
 		case MOD_KNIFE:
+			murderWeapon = KNIFE_NAME;
 			switch (loc) {
 			case LOC_HDAM:
 				if (IsNeutral(self))
@@ -1148,6 +1165,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 			}
 			break;
 		case MOD_KNIFE_THROWN:
+			murderWeapon = "Thrown " KNIFE_NAME;
 			switch (loc) {
 				case LOC_HDAM:
 				message = " caught";
@@ -1186,9 +1204,11 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 			}
 			break;
 		case MOD_GAS:
+			murderWeapon = "Toxic gas";
 			message = " sucks down some toxic gas thanks to";
 			break;
 		case MOD_KICK:
+			murderWeapon = "Kick";
 			n = rand() % 3 + 1;
 			if (n == 1) {
 				if (IsNeutral(self))
@@ -1222,6 +1242,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 			}
 			break;
 		case MOD_PUNCH:
+			murderWeapon = "Punch";
 			n = rand() % 3 + 1;
 			if (n == 1) {
 				message = " got a free facelift by";
@@ -1252,6 +1273,7 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 		case MOD_GRENADE:
 			message = "was popped by";
 			message2 = "'s grenade";
+			murderWeapon = GRENADE_NAME;
 			break;
 		case MOD_G_SPLASH:
 			message = "was shredded by";
@@ -1287,10 +1309,12 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 		case MOD_HANDGRENADE:
 			message = " caught";
 			message2 = "'s handgrenade";
+			murderWeapon = GRENADE_NAME;
 			break;
 		case MOD_HG_SPLASH:
 			message = " didn't see";
 			message2 = "'s handgrenade";
+			murderWeapon = GRENADE_NAME;
 			break;
 		case MOD_HELD_GRENADE:
 			message = " feels";
@@ -1312,6 +1336,14 @@ void ClientObituary(edict_t * self, edict_t * inflictor, edict_t * attacker)
 			message, attacker->client->pers.netname, message2);
 			PrintDeathMessage(death_msg, self);
 			IRC_printf(IRC_T_KILL, death_msg);
+
+			if(!murderWeapon)
+				murderWeapon = "Unknown";
+			STATS_OUT(STATS_KILL,
+				attacker->client->pers.netname,
+				self->client->pers.netname,
+				murderWeapon);
+
 			//FIREBLADE
 			if (!deathmatch->value)
 				return;
@@ -3124,6 +3156,8 @@ void ClientUserinfoChanged(edict_t * ent, char *userinfo)
 			gi.bprintf(PRINT_MEDIUM, "%s is now known as %s.\n", ent->client->pers.netname, tnick);	//TempFile
 			IRC_printf(IRC_T_SERVER, "%n is now known as %n.", ent->client->pers.netname, tnick);
 			nickChanged = true;
+			
+			STATS_OUT(STATS_NAMECHANGE, ent->client->pers.netname, tnick);
 		}
 		strcpy(ent->client->pers.netname, tnick);
 	}

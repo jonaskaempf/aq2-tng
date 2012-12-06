@@ -783,7 +783,7 @@ T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t dir,
 
 		{
 
-			// TNG Stats - Add +1 to hit, make sure that hc and m3 are handles differently
+			// TNG Stats - Add +1 to hit, make sure that hc and m3 are handled differently
 
 			if ((attacker->client) && (mod != MOD_M3) && (mod != MOD_HC)) {
 				strcpy(attacker->client->resp.last_damaged_players, targ->client->pers.netname);

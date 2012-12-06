@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 
-int _stdcall
+int __stdcall
 DLLMain (void *hinstDll, unsigned long dwReason, void *reserved)
 {
   return (1);

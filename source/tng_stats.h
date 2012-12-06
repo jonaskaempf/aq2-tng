@@ -4,3 +4,5 @@ void Cmd_Stats_f (edict_t *targetent, char *arg);
 void Cmd_Statmode_f(edict_t *ent, char *arg);
 void ResetStats(edict_t *ent);
 
+void Stats_LogLevelStats();
+

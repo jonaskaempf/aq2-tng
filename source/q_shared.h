@@ -153,9 +153,11 @@
 typedef unsigned char byte;
 typedef enum
 {
-  false, true
+  qfalse, qtrue
 } qboolean;
-
+#define true qtrue
+#define false qfalse
+#define bool qboolean
 
 #ifndef NULL
 #define NULL ((void *)0)

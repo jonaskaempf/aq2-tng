@@ -410,6 +410,7 @@ cvar_t *team2score;
 cvar_t *team3score;*/
 cvar_t *stats_endmap; // If on (1) show the fpm/etc stats when the map ends
 cvar_t *stats_afterround;     // Collect TNG stats between rounds
+cvar_t *stats_log;	// Log TNG stats to console
 
 cvar_t *auto_join;
 cvar_t *auto_equip;
@@ -593,6 +594,10 @@ void EndDMLevel (void)
 	(void) strftime (ltm, 64, "%A %d %B %H:%M:%S", now);
 	gi.bprintf (PRINT_HIGH, "Game ending at: %s\n", ltm);
 	IRC_printf (IRC_T_GAME, "Game ending at: %s", ltm);
+
+	Stats_LogLevelStats ();
+	STATS_OUT(STATS_ENDMATCH, ltm);
+	
 
 	// stay on same level flag
 	if ((int) dmflags->value & DF_SAME_LEVEL)
